@@ -1,5 +1,3 @@
-# Chrome 1Password Extension
-
 # C8Y Session 1Password Chrome Extension
 
 A Chrome extension that provides a user interface for the [c8y-session-1password](https://github.com/thomaswinkler/c8y-session-1password) native messaging host, allowing you to search and launch Cumulocity IoT sessions stored in 1Password.
