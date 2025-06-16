@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C8Y Session 1Password</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Cumulocity Sessions</h1>
+        
+        <form id="search-form">
+            <div class="search-row">
+                <div class="input-group search-field">
+                    <input type="text" id="search-input" placeholder="Enter search term...">
+                </div>
+                
+                <div class="input-group tags-field">
+                    <input type="text" id="tags-input" placeholder="c8y, dev, prod">
+                </div>
+                
+                <button type="submit" id="search-button" class="search-icon-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="input-group checkbox-group">
+                <label class="checkbox-label" for="auto-login-toggle">
+                    <input type="checkbox" id="auto-login-toggle">
+                    <span class="checkbox-text">Enable automatic OAuth login</span>
+                </label>
+            </div>
+        </form>
+        
+        <div id="status-area" class="status-area"></div>
+        <div id="results-area" class="results-area"></div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

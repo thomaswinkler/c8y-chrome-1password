@@ -1,0 +1,29 @@
+{
+  "name": "c8y-session-1password-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension interface for c8y-session-1password native messaging host to manage Cumulocity IoT sessions.",
+  "main": "src/background.js",
+  "scripts": {
+    "install-host": "./install.sh",
+    "lint": "echo 'Linting not configured'",
+    "test": "echo 'Testing not configured'"
+  },
+  "keywords": [
+    "chrome",
+    "extension",
+    "1password",
+    "cumulocity",
+    "c8y",
+    "session",
+    "native-messaging"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/c8y-session-1password-extension"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
