@@ -65,15 +65,6 @@ async function performOAuthLogin(baseUrl, username, password, oauthOption) {
     console.log('Starting OAuth authentication for:', baseUrl);
 
     try {
-        // STEP A: Get CSRF token first (mandatory for CSRF protection)
-        const csrfToken = await loadCsrfToken(baseUrl);
-        if (csrfToken) {
-            console.log('CSRF token obtained');
-        } else {
-            console.warn('No CSRF token available');
-        }
-
-        // STEP B: Perform OAuth request with CSRF token
         // Construct OAuth URL using baseUrl with path from initRequest
         const initRequestUrl = new URL(oauthOption.initRequest);
         const oauthUrl = baseUrl + initRequestUrl.pathname + (initRequestUrl.search || '');
@@ -89,10 +80,6 @@ async function performOAuthLogin(baseUrl, username, password, oauthOption) {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json, text/plain, */*'
         };
-
-        if (csrfToken) {
-            headers['X-XSRF-TOKEN'] = csrfToken;
-        }
 
         const response = await fetch(oauthUrl, {
             method: 'POST',
@@ -112,178 +99,6 @@ async function performOAuthLogin(baseUrl, username, password, oauthOption) {
     }
 
     console.log('OAuth authentication successful');
-}
-
-/**
- * Get CSRF token by making initial request to login page
- */
-async function loadCsrfToken(baseUrl) {
-    try {
-        // Primary method: Try the main login page
-        const loginPageUrl = `${baseUrl}/apps/devicemanagement/`;
-        const response = await fetch(loginPageUrl, {
-            method: 'GET',
-            credentials: 'omit', // Don't include existing cookies when getting CSRF token
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Cache-Control': 'no-cache'
-            }
-        });
-
-        if (!response.ok) {
-            console.error('Failed to fetch login page:', response.status, response.statusText);
-            return await loadCsrfTokenAlternative(baseUrl);
-        }
-
-        // // Extract CSRF token from Set-Cookie headers
-        // const setCookieHeaders = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
-        // let csrfToken = null;
-
-        // // Look for XSRF-TOKEN in cookies
-        // for (const cookieHeader of setCookieHeaders) {
-        //     if (cookieHeader.includes('XSRF-TOKEN=')) {
-        //         const match = cookieHeader.match(/XSRF-TOKEN=([^;]+)/);
-        //         if (match) {
-        //             csrfToken = match[1];
-        //             break;
-        //         }
-        //     }
-        // }
-
-        // // If no token in headers, try HTML content
-        // if (!csrfToken) {
-        //     const htmlContent = await response.text();
-        //     const tokenPatterns = [
-        //         /<meta name="csrf-token" content="([^"]+)"/i,
-        //         /<meta name="_csrf" content="([^"]+)"/i,
-        //         /<input[^>]*name="csrf[^"]*"[^>]*value="([^"]+)"/i,
-        //         /window\.csrfToken\s*=\s*["']([^"']+)["']/i
-        //     ];
-
-        //     for (const pattern of tokenPatterns) {
-        //         const match = htmlContent.match(pattern);
-        //         if (match) {
-        //             csrfToken = match[1];
-        //             break;
-        //         }
-        //     }
-        // }
-
-        // // Set any cookies from the login page
-        // if (setCookieHeaders.length > 0) {
-        //     for (const cookieHeader of setCookieHeaders) {
-        //         try {
-        //             await setCookieFromHeader(baseUrl, cookieHeader);
-        //         } catch (error) {
-        //             // Ignore cookie setting errors
-        //         }
-        //     }
-        // }
-
-        // return csrfToken;
-
-    } catch (error) {
-        console.error('Error getting CSRF token:', error);
-        return await loadCsrfTokenAlternative(baseUrl);
-    }
-}
-
-/**
- * Alternative method to get CSRF token from tenant endpoint
- */
-async function loadCsrfTokenAlternative(baseUrl) {
-    try {
-        const currentUserUrl = `${baseUrl}/user/currentUser`;
-        const response = await fetch(currentUserUrl, {
-            method: 'GET',
-            credentials: 'omit', // Don't include existing cookies for alternative CSRF token
-            headers: {
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache'
-            }
-        });
-
-        // const setCookieHeaders = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
-        // let csrfToken = null;
-
-        // // Look for XSRF-TOKEN in cookies
-        // for (const cookieHeader of setCookieHeaders) {
-        //     if (cookieHeader.includes('XSRF-TOKEN=')) {
-        //         const match = cookieHeader.match(/XSRF-TOKEN=([^;]+)/);
-        //         if (match) {
-        //             csrfToken = match[1];
-        //             break;
-        //         }
-        //     }
-        // }
-
-        // // Set any cookies from this endpoint
-        // if (setCookieHeaders.length > 0) {
-        //     for (const cookieHeader of setCookieHeaders) {
-        //         try {
-        //             await setCookieFromHeader(baseUrl, cookieHeader);
-        //         } catch (error) {
-        //             // Ignore cookie setting errors
-        //         }
-        //     }
-        // }
-
-        return csrfToken;
-
-    } catch (error) {
-        console.error('Alternative CSRF token method failed:', error);
-        return null;
-    }
-}
-
-/**
- * Set a cookie from a Set-Cookie header
- */
-async function setCookieFromHeader(baseUrl, cookieHeader) {
-    // Parse the cookie header
-    const parts = cookieHeader.split(';').map(part => part.trim());
-    const [nameValue] = parts;
-    const [name, value] = nameValue.split('=').map(part => part.trim());
-
-    if (!name || value === undefined) {
-        console.warn('Invalid cookie format');
-        return;
-    }
-
-    // Extract domain and path from other parts
-    let domain = new URL(baseUrl).hostname;
-    let path = '/';
-    let secure = false;
-    let httpOnly = false;
-
-    for (const part of parts.slice(1)) {
-        const [key, val] = part.split('=').map(p => p.trim());
-        const lowerKey = key.toLowerCase();
-
-        if (lowerKey === 'domain') {
-            domain = val;
-        } else if (lowerKey === 'path') {
-            path = val;
-        } else if (lowerKey === 'secure') {
-            secure = true;
-        } else if (lowerKey === 'httponly') {
-            httpOnly = true;
-        }
-    }
-
-    const cookieDetails = {
-        url: baseUrl,
-        name: name,
-        value: value,
-        domain: domain,
-        path: path,
-        secure: secure,
-        httpOnly: httpOnly
-    };
-
-    console.log(`Setting cookie: ${name}=${value}, domain=${domain}, path=${path}, secure=${secure}, httpOnly=${httpOnly}`);
-
-    await chrome.cookies.set(cookieDetails);
 }
 
 // Listen for messages from popup and other extension components
