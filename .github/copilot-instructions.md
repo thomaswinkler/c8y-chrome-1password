@@ -21,9 +21,6 @@ This is a Google Chrome Extension using Manifest V3 that serves as a user interf
 4. Clicking result performs OAuth authentication (if enabled) then opens URL in new tab
 
 ### OAuth Authentication
-- **Two-step CSRF-protected OAuth** flow for Cumulocity IoT
-- **Step A**: Get XSRF token from login page (`/apps/devicemanagement/`)
-- **Step B**: Perform OAuth with CSRF token in `X-XSRF-TOKEN` header
 - **Service worker context** for OAuth requests
 - **Chrome Cookies API** for cookie management
 - **Global toggle** to enable/disable automatic OAuth login
